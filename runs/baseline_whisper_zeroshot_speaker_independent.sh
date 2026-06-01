@@ -1,0 +1,1 @@
+python -m baselines.whisper_zeroshot --config configs/whisper_zeroshot_speaker_independent.yaml

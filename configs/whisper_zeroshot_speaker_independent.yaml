@@ -1,0 +1,19 @@
+experiment:
+  name: whisper_zeroshot_speaker_independent
+
+data:
+  test_manifest: data/manifests/speaker_independent/test.jsonl
+
+model:
+  name: openai/whisper-small
+  language: en
+  task: transcribe
+  sampling_rate: 16000
+  max_new_tokens: 128
+
+runtime:
+  device: cuda
+
+output:
+  prediction_path: results/predictions/whisper_zeroshot_speaker_independent.jsonl
+  metric_path: results/metrics/whisper_zeroshot_speaker_independent.json
