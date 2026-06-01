@@ -1,0 +1,1 @@
+python -m scripts.check_manifest --config configs/test_dummy.yaml

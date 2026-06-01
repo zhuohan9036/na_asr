@@ -1,0 +1,24 @@
+# raw data and manifested files
+data/raw
+data/manifests/*.json
+data/manifests/*.jsonl
+!data/manifests/test_dummy.jsonl
+
+# checkpoints and logs
+checkpoints/
+logs/
+
+# python cache
+__pycache__/
+*.pyc
+
+# virtual environment
+.env/
+.venv/
+
+# results
+results/predictions/
+results/metrics/
+results/tables/
+results/figures/
+

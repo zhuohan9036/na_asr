@@ -1,0 +1,11 @@
+experiment:
+  name: test_dummy
+
+seed: 42
+
+data:
+  manifest_path: data/manifests/test_dummy.jsonl
+
+output:
+  prediction_path: results/predictions/test_dummy_predictions.jsonl
+  metric_path: results/metrics/test_dummy_metrics.json

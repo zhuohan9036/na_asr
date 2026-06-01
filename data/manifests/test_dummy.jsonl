@@ -1,0 +1,2 @@
+{"utt_id": "utt_001", "speaker_id": "spk_001", "accent_label": "Mandarin", "dataset_name": "L2-ARCTIC", "wav_path": "/fake/path/utt_001.wav", "transcript": "hello world", "split": "test"}
+{"utt_id": "utt_002", "speaker_id": "spk_002", "accent_label": "Arabic", "dataset_name": "L2-ARCTIC", "wav_path": "/fake/path/utt_002.wav", "transcript": "this is a test", "split": "test"}
