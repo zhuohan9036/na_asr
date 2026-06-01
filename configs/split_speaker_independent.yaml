@@ -1,0 +1,16 @@
+experiment:
+  name: split_speaker_independent
+
+seed: 42
+
+data:
+  input_metadata: data/raw/metadata_all.jsonl
+
+split:
+  strategy: speaker_independent
+  train_ratio: 0.75
+  dev_ratio: 0.125
+
+output:
+  manifest_dir: data/manifests/speaker_independent
+  summary_path: results/tables/speaker_independent_split_summary.json

@@ -1,0 +1,20 @@
+experiment:
+  name: split_random_utterance
+
+seed: 42
+
+data:
+  input_metadata: data/raw/metadata_all.jsonl
+
+split:
+  strategy: random_utterance
+  train_ratio: 0.8
+  dev_ratio: 0.1
+  test_ratio: 0.1
+
+  # 建议打开。这样每个 accent 都按 8/1/1 切，避免某些 accent 被随机分偏。
+  stratify_by_accent: true
+
+output:
+  manifest_dir: data/manifests/random_utterance
+  summary_path: results/tables/random_utterance_split_summary.json

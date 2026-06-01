@@ -36,6 +36,12 @@ L2ARCTIC_SPEAKER_TO_ACCENT = {
     "ERMS": "Spanish",
     "MBMPS": "Spanish",
     "NJS": "Spanish",
+    
+    # Vietnamese
+    "HQTV": "Vietnamese",
+    "PNV": "Vietnamese",
+    "THV": "Vietnamese",
+    "TLV": "Vietnamese",
 }
 
 

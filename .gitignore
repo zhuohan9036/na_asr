@@ -2,6 +2,8 @@
 data/raw
 data/manifests/*.json
 data/manifests/*.jsonl
+data/manifests/**/*.json
+data/manifests/**/*.jsonl
 !data/manifests/test_dummy.jsonl
 
 # checkpoints and logs
@@ -21,4 +23,3 @@ results/predictions/
 results/metrics/
 results/tables/
 results/figures/
-

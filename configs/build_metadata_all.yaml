@@ -34,9 +34,6 @@ data:
   #   - YKWK
   #   - ZHAA
 
-split:
-  train_ratio: 0.75
-  dev_ratio: 0.125
 
 output:
   metadata_path: data/raw/metadata_all.jsonl
