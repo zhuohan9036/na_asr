@@ -1,0 +1,20 @@
+experiment:
+  name: whisper_large_v3_zeroshot_speaker_independent_test_utterance_dev
+
+data:
+  test_manifest: data/l2arctic/manifests/speaker_independent_test_utterance_dev/test.jsonl
+
+model:
+  name: openai/whisper-large-v3
+  language: en
+  task: transcribe
+  sampling_rate: 16000
+  max_new_tokens: 128
+  torch_dtype: float16
+
+runtime:
+  device: cuda
+
+output:
+  prediction_path: results/l2arctic/predictions/whisper_large_v3_zeroshot_speaker_independent_test_utterance_dev.jsonl
+  metric_path: results/l2arctic/metrics/whisper_large_v3_zeroshot_speaker_independent_test_utterance_dev.json
