@@ -1,5 +1,0 @@
-experiment:
-  name: check_speaker_independent_dev
-
-data:
-  manifest_path: data/manifests/speaker_independent/dev.jsonl

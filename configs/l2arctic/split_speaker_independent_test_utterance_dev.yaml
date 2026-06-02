@@ -4,7 +4,7 @@ experiment:
 seed: 42
 
 data:
-  input_metadata: data/raw/metadata_all.jsonl
+  input_metadata: data/l2arctic/raw/metadata_all.jsonl
 
 split:
   strategy: speaker_independent_test_utterance_dev
@@ -18,5 +18,5 @@ split:
   dev_utterance_ratio: 0.1
 
 output:
-  manifest_dir: data/manifests/speaker_independent_test_utterance_dev
-  summary_path: results/tables/speaker_independent_test_utterance_dev_split_summary.json
+  manifest_dir: data/l2arctic/manifests/speaker_independent_test_utterance_dev
+  summary_path: results/l2arctic/tables/speaker_independent_test_utterance_dev_split_summary.json

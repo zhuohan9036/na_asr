@@ -2,7 +2,7 @@ experiment:
   name: prepare_asr_manifest
 
 data:
-  input_metadata: data/raw/metadata_all.jsonl
+  input_metadata: data/l2arctic/raw/metadata_all.jsonl
 
   keep_datasets:
     - L2-ARCTIC
@@ -19,4 +19,4 @@ data:
   strict_wav_check: false
 
 output:
-  manifest_dir: data/manifests
+  manifest_dir: data/l2arctic/manifests

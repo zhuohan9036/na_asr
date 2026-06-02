@@ -4,7 +4,7 @@ experiment:
 seed: 42
 
 data:
-  input_metadata: data/raw/metadata_all.jsonl
+  input_metadata: data/l2arctic/raw/metadata_all.jsonl
 
 split:
   strategy: random_utterance
@@ -16,5 +16,5 @@ split:
   stratify_by_accent: true
 
 output:
-  manifest_dir: data/manifests/random_utterance
-  summary_path: results/tables/random_utterance_split_summary.json
+  manifest_dir: data/l2arctic/manifests/random_utterance
+  summary_path: results/l2arctic/tables/random_utterance_split_summary.json

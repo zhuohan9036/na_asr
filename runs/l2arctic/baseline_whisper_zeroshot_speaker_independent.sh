@@ -1,0 +1,1 @@
+python -m baselines.whisper_zeroshot --config configs/l2arctic/whisper_zeroshot_speaker_independent.yaml

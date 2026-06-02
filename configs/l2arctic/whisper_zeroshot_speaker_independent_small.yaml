@@ -1,0 +1,19 @@
+experiment:
+  name: whisper_zeroshot_debug_20
+
+data:
+  test_manifest: data/l2arctic/manifests/debug/test_20.jsonl
+
+model:
+  name: openai/whisper-small
+  language: en
+  task: transcribe
+  sampling_rate: 16000
+  max_new_tokens: 128
+
+runtime:
+  device: cuda
+
+output:
+  prediction_path: results/l2arctic/predictions/whisper_zeroshot_debug_20.jsonl
+  metric_path: results/l2arctic/metrics/whisper_zeroshot_debug_20.json

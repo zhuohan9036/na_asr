@@ -36,4 +36,4 @@ data:
 
 
 output:
-  metadata_path: data/raw/metadata_all.jsonl
+  metadata_path: data/l2arctic/raw/metadata_all.jsonl

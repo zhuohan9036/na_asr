@@ -1,0 +1,1 @@
+python -m scripts.l2arctic.check_manifest --config configs/l2arctic/test_dummy.yaml

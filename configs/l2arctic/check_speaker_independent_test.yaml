@@ -1,0 +1,5 @@
+experiment:
+  name: check_speaker_independent_test
+
+data:
+  manifest_path: data/l2arctic/manifests/speaker_independent/test.jsonl
