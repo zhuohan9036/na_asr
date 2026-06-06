@@ -1,115 +1,131 @@
-from pathlib import Path
+# src/data/manifest.py
+
+from __future__ import annotations
+
 import json
+from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
 
-REQUIRED_COLUMNS = [
+BASE_REQUIRED_COLUMNS = [
     "utt_id",
     "speaker_id",
-    "accent_label",
     "dataset_name",
     "wav_path",
     "transcript",
-    "split",
 ]
 
 
-def load_manifest(path: str) -> pd.DataFrame:
-    """
-    Load a manifest file.
-
-    Supported formats:
-    - .jsonl: one JSON object per line
-    - .json: a list of JSON objects
-    """
+def read_jsonl(path: str | Path) -> list[dict[str, Any]]:
     path = Path(path)
 
-    if not path.exists():
-        raise FileNotFoundError(f"Manifest file not found: {path}")
-
-    if path.suffix == ".jsonl":
-        records = _read_jsonl(path)
-    elif path.suffix == ".json":
-        records = _read_json(path)
-    else:
-        raise ValueError(
-            f"Unsupported manifest format: {path.suffix}. "
-            "Please use .jsonl or .json."
-        )
-
-    df = pd.DataFrame(records)
-    validate_manifest(df)
-    return df
-
-
-def _read_jsonl(path: Path) -> list[dict]:
-    records = []
+    records: list[dict[str, Any]] = []
 
     with open(path, "r", encoding="utf-8") as f:
         for line_idx, line in enumerate(f, start=1):
             line = line.strip()
-
             if not line:
                 continue
 
             try:
-                record = json.loads(line)
+                records.append(json.loads(line))
             except json.JSONDecodeError as e:
-                raise ValueError(
-                    f"Invalid JSON at line {line_idx} in {path}: {e}"
-                ) from e
-
-            if not isinstance(record, dict):
-                raise ValueError(
-                    f"Each line in a .jsonl manifest must be a JSON object. "
-                    f"Line {line_idx} is {type(record).__name__}."
-                )
-
-            records.append(record)
+                raise ValueError(f"Invalid JSON at {path}:{line_idx}: {e}") from e
 
     return records
 
 
-def _read_json(path: Path) -> list[dict]:
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+def load_manifest(
+    manifest_path: str | Path,
+    required_columns: list[str] | None = None,
+    validate: bool = True,
+) -> pd.DataFrame:
+    """
+    Load a JSONL ASR manifest.
 
-    if not isinstance(data, list):
-        raise ValueError(
-            f"A .json manifest should be a list of JSON objects, "
-            f"but got {type(data).__name__}."
-        )
+    By default, this validates only dataset-agnostic ASR fields.
+    Dataset-specific fields such as accent_label should be handled by
+    experiment configs via evaluation.group_cols, not required globally.
+    """
+    manifest_path = Path(manifest_path)
 
-    for idx, item in enumerate(data):
-        if not isinstance(item, dict):
-            raise ValueError(
-                f"Every item in a .json manifest should be a JSON object. "
-                f"Item {idx} is {type(item).__name__}."
-            )
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"Manifest file not found: {manifest_path}")
 
-    return data
+    records = read_jsonl(manifest_path)
+
+    if len(records) == 0:
+        raise ValueError(f"Manifest is empty: {manifest_path}")
+
+    df = pd.DataFrame(records)
+
+    if validate:
+        validate_manifest(df, required_columns=required_columns)
+
+    return df
 
 
-def validate_manifest(df: pd.DataFrame) -> bool:
-    missing = [col for col in REQUIRED_COLUMNS if col not in df.columns]
+def validate_manifest(
+    df: pd.DataFrame,
+    required_columns: list[str] | None = None,
+) -> None:
+    """
+    Validate a manifest dataframe.
+
+    The default required columns are intentionally minimal so that the same
+    ASR pipeline can support both L2-ARCTIC and SANDI.
+
+    L2-ARCTIC may have:
+        accent_label
+
+    SANDI may have:
+        prompt_id
+        official_split
+        partial_word_count
+        hesitation_count
+
+    These should be treated as optional / configurable group columns.
+    """
+    if required_columns is None:
+        required_columns = BASE_REQUIRED_COLUMNS
+
+    missing = [col for col in required_columns if col not in df.columns]
 
     if missing:
         raise ValueError(f"Missing required columns in manifest: {missing}")
 
-    if df.empty:
-        raise ValueError("Manifest is empty.")
+    null_required = []
 
-    null_columns = [
-        col for col in REQUIRED_COLUMNS
-        if df[col].isnull().any()
-    ]
+    for col in required_columns:
+        if df[col].isna().any():
+            null_required.append(col)
 
-    if null_columns:
-        raise ValueError(f"Required columns contain null values: {null_columns}")
-
-    return True
+    if null_required:
+        raise ValueError(f"Required columns contain null values: {null_required}")
 
 
-def filter_split(df: pd.DataFrame, split: str) -> pd.DataFrame:
-    return df[df["split"] == split].reset_index(drop=True)
+def check_manifest_paths(df: pd.DataFrame, max_missing_examples: int = 10) -> None:
+    """
+    Optional helper: check whether wav_path exists.
+
+    This is not automatically called in load_manifest because path checking
+    can be expensive for large datasets.
+    """
+    if "wav_path" not in df.columns:
+        raise ValueError("Cannot check paths because manifest has no wav_path column.")
+
+    missing_paths = []
+
+    for wav_path in df["wav_path"].tolist():
+        path = Path(wav_path)
+        if not path.exists():
+            missing_paths.append(str(path))
+
+    if missing_paths:
+        examples = "\n".join(missing_paths[:max_missing_examples])
+        raise FileNotFoundError(
+            f"Found {len(missing_paths)} missing audio files. "
+            f"First examples:\n{examples}"
+        )

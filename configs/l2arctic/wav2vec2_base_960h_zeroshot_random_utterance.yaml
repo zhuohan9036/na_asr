@@ -12,6 +12,11 @@ model:
 runtime:
   device: cuda
 
+evaluation:
+  group_cols:
+    - accent_label
+    - speaker_id
+
 output:
   prediction_path: results/l2arctic/predictions/wav2vec2_base_960h_zeroshot_random_utterance.jsonl
   metric_path: results/l2arctic/metrics/wav2vec2_base_960h_zeroshot_random_utterance.json

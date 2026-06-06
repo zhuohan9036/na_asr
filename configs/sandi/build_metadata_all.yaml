@@ -1,0 +1,12 @@
+experiment:
+  name: sandi_build_metadata_all
+
+data:
+  sandi_root: ../sandi-corpus-2025
+  dataset_name: SpeakAndImprove2025
+  strict: false
+
+output:
+  metadata_path: data/sandi/raw/metadata_all.jsonl
+  manifest_dir: data/sandi/manifests
+  summary_path: results/sandi/tables/metadata_summary.json

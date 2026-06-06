@@ -44,6 +44,16 @@ def main():
     test_df = load_manifest(test_manifest)
     logger.info(f"Loaded test samples: {len(test_df)}")
 
+    reference_col = config.get("evaluation", {}).get("reference_col", "transcript")
+
+    if reference_col not in test_df.columns:
+        raise ValueError(
+            f"Reference column '{reference_col}' not found in manifest. "
+            f"Available columns: {list(test_df.columns)}"
+        )
+
+    logger.info(f"Reference column: {reference_col}")
+
     logger.info("Accent distribution:")
     logger.info(f"\n{test_df['accent_label'].value_counts()}")
 
@@ -75,13 +85,25 @@ def main():
         try:
             prediction = model.transcribe_file(wav_path=wav_path)
 
+            # record = {
+            #     "utt_id": row["utt_id"],
+            #     "speaker_id": row["speaker_id"],
+            #     "accent_label": row["accent_label"],
+            #     "dataset_name": row["dataset_name"],
+            #     "wav_path": row["wav_path"],
+            #     "reference": row["transcript"],
+            #     "prediction": prediction,
+            #     "model_name": config["model"]["name"],
+            #     "training_setting": "zero_shot",
+            # }
             record = {
                 "utt_id": row["utt_id"],
                 "speaker_id": row["speaker_id"],
-                "accent_label": row["accent_label"],
+                "accent_label": row["accent_label"] if "accent_label" in row else row.get("dataset_name", "unknown"),
                 "dataset_name": row["dataset_name"],
                 "wav_path": row["wav_path"],
-                "reference": row["transcript"],
+                "reference": row[reference_col],
+                "reference_col": reference_col,
                 "prediction": prediction,
                 "model_name": config["model"]["name"],
                 "training_setting": "zero_shot",
@@ -133,11 +155,20 @@ def main():
 
     pred_df = pd.DataFrame(prediction_records)
 
+    # metrics = evaluate_asr_predictions(
+    #     prediction_df=pred_df,
+    #     reference_col="reference",
+    #     prediction_col="prediction",
+    #     group_cols=["accent_label", "speaker_id"],
+    # )
+
+    group_cols = config.get("evaluation", {}).get("group_cols", ["speaker_id"])
+
     metrics = evaluate_asr_predictions(
         prediction_df=pred_df,
         reference_col="reference",
         prediction_col="prediction",
-        group_cols=["accent_label", "speaker_id"],
+        group_cols=group_cols,
     )
 
     save_metrics(metrics, metric_path)

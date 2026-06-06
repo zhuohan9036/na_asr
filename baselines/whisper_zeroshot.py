@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from tqdm import tqdm
@@ -15,7 +16,7 @@ from src.models.whisper_asr import WhisperASR
 from src.evaluation.group_metrics import evaluate_asr_predictions, save_metrics
 
 
-def write_jsonl(records: list[dict], output_path: str | Path) -> None:
+def write_jsonl(records: list[dict[str, Any]], output_path: str | Path) -> None:
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -24,7 +25,84 @@ def write_jsonl(records: list[dict], output_path: str | Path) -> None:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def main():
+def get_optional_fields(row: pd.Series) -> dict[str, Any]:
+    """
+    Keep useful dataset-specific metadata if present.
+
+    L2-ARCTIC fields:
+      - accent_label
+
+    SANDI fields:
+      - prompt_id
+      - official_split
+      - partial_word_count
+      - hesitation_count
+      - question_text
+      - speaking_time
+    """
+    optional_fields = [
+        "accent_label",
+        "native_language",
+        "duration",
+        "prompt_id",
+        "official_split",
+        "split",
+        "relative_audio_path",
+        "partial_word_count",
+        "word_count_keep_partial",
+        "word_count_drop_partial",
+        "hesitation_count",
+        "tag_counts",
+        "question_text",
+        "speaking_time",
+    ]
+
+    metadata: dict[str, Any] = {}
+
+    for field in optional_fields:
+        if field in row.index:
+            value = row[field]
+
+            # Avoid putting pandas NaN into JSON.
+            if pd.isna(value) if not isinstance(value, (dict, list)) else False:
+                continue
+
+            metadata[field] = value
+
+    return metadata
+
+
+def log_column_distribution(
+    logger,
+    df: pd.DataFrame,
+    column: str,
+    max_rows: int = 30,
+) -> None:
+    if column not in df.columns:
+        logger.info(f"Column not found, skip distribution: {column}")
+        return
+
+    counts = df[column].value_counts()
+
+    logger.info(f"{column} distribution:")
+    logger.info(f"\n{counts.head(max_rows)}")
+
+    if len(counts) > max_rows:
+        logger.info(f"... truncated. Total unique {column}: {len(counts)}")
+
+
+def validate_group_cols(df: pd.DataFrame, group_cols: list[str]) -> list[str]:
+    """
+    Keep only group columns that exist.
+
+    This avoids crashing if a config is shared across datasets with different
+    metadata fields. However, if all requested columns are missing, we return
+    an empty list and evaluation will only report overall metrics.
+    """
+    return [col for col in group_cols if col in df.columns]
+
+
+def main() -> None:
     config = load_config()
 
     experiment_name = config["experiment"]["name"]
@@ -43,12 +121,32 @@ def main():
 
     test_df = load_manifest(test_manifest)
     logger.info(f"Loaded test samples: {len(test_df)}")
+    logger.info(f"Manifest columns: {list(test_df.columns)}")
 
-    logger.info("Accent distribution:")
-    logger.info(f"\n{test_df['accent_label'].value_counts()}")
+    evaluation_config = config.get("evaluation", {})
+    reference_col = evaluation_config.get("reference_col", "transcript")
 
-    logger.info("Speaker distribution:")
-    logger.info(f"\n{test_df['speaker_id'].value_counts()}")
+    if reference_col not in test_df.columns:
+        raise ValueError(
+            f"Reference column '{reference_col}' not found in manifest. "
+            f"Available columns: {list(test_df.columns)}"
+        )
+
+    requested_group_cols = evaluation_config.get("group_cols", ["speaker_id"])
+    group_cols = validate_group_cols(test_df, requested_group_cols)
+
+    missing_group_cols = [col for col in requested_group_cols if col not in test_df.columns]
+
+    logger.info(f"Reference column: {reference_col}")
+    logger.info(f"Requested group columns: {requested_group_cols}")
+    logger.info(f"Effective group columns: {group_cols}")
+
+    if missing_group_cols:
+        logger.warning(f"Missing group columns will be ignored: {missing_group_cols}")
+
+    # Useful distributions. These are safe for both L2-ARCTIC and SANDI.
+    for column in ["dataset_name", "accent_label", "speaker_id", "prompt_id", "official_split"]:
+        log_column_distribution(logger, test_df, column)
 
     model = WhisperASR(
         model_name=config["model"]["name"],
@@ -56,6 +154,7 @@ def main():
         language=config["model"].get("language", "en"),
         task=config["model"].get("task", "transcribe"),
         sampling_rate=config["model"].get("sampling_rate", 16000),
+        torch_dtype=config["model"].get("torch_dtype"),
     )
 
     logger.info(f"Loaded Whisper model: {config['model']['name']}")
@@ -63,8 +162,8 @@ def main():
 
     max_new_tokens = config["model"].get("max_new_tokens", 128)
 
-    prediction_records = []
-    failed_records = []
+    prediction_records: list[dict[str, Any]] = []
+    failed_records: list[dict[str, Any]] = []
 
     for _, row in tqdm(test_df.iterrows(), total=len(test_df), desc="Whisper inference"):
         utt_id = row["utt_id"]
@@ -76,24 +175,19 @@ def main():
                 max_new_tokens=max_new_tokens,
             )
 
-            record = {
+            record: dict[str, Any] = {
                 "utt_id": row["utt_id"],
                 "speaker_id": row["speaker_id"],
-                "accent_label": row["accent_label"],
                 "dataset_name": row["dataset_name"],
                 "wav_path": row["wav_path"],
-                "reference": row["transcript"],
+                "reference": row[reference_col],
+                "reference_col": reference_col,
                 "prediction": prediction,
                 "model_name": config["model"]["name"],
                 "training_setting": "zero_shot",
             }
 
-            # Optional fields.
-            if "duration" in row:
-                record["duration"] = row["duration"]
-
-            if "native_language" in row:
-                record["native_language"] = row["native_language"]
+            record.update(get_optional_fields(row))
 
             prediction_records.append(record)
 
@@ -118,14 +212,37 @@ def main():
         write_jsonl(failed_records, failed_path)
         logger.warning(f"Saved failed records to: {failed_path}")
 
+    if len(prediction_records) == 0:
+        logger.error("No successful predictions. Evaluation is skipped.")
+
+        if failed_records:
+            logger.error("First failed examples:")
+            for item in failed_records[:5]:
+                logger.error(json.dumps(item, ensure_ascii=False))
+
+        raise RuntimeError(
+            "All inference attempts failed. "
+            "Please check the .failed.jsonl file and the log for the actual error."
+        )
+
     pred_df = pd.DataFrame(prediction_records)
 
     metrics = evaluate_asr_predictions(
         prediction_df=pred_df,
         reference_col="reference",
         prediction_col="prediction",
-        group_cols=["accent_label", "speaker_id"],
+        group_cols=group_cols,
     )
+
+    # Add experiment metadata to the metric file.
+    metrics["experiment"] = {
+        "name": experiment_name,
+        "model_name": config["model"]["name"],
+        "test_manifest": test_manifest,
+        "reference_col": reference_col,
+        "group_cols": group_cols,
+        "requested_group_cols": requested_group_cols,
+    }
 
     save_metrics(metrics, metric_path)
 

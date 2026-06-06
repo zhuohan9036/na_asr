@@ -1,10 +1,10 @@
 # raw data and manifested files
-data/l2arctic/raw
-data/l2arctic/manifests/*.json
-data/l2arctic/manifests/*.jsonl
-data/l2arctic/manifests/**/*.json
-data/l2arctic/manifests/**/*.jsonl
-!data/l2arctic/manifests/test_dummy.jsonl
+data/***/raw
+data/***/manifests/*.json
+data/***/manifests/*.jsonl
+data/***/manifests/**/*.json
+data/***/manifests/**/*.jsonl
+!data/***/manifests/test_dummy.jsonl
 
 # checkpoints and logs
 checkpoints/
@@ -19,7 +19,7 @@ __pycache__/
 .venv/
 
 # results
-results/l2arctic/predictions/
-results/l2arctic/metrics/
-results/l2arctic/tables/
-results/l2arctic/figures/
+results/***/predictions/
+results/***/metrics/
+results/***/tables/
+results/***/figures/
