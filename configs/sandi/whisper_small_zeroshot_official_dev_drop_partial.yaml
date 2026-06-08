@@ -1,5 +1,5 @@
 experiment:
-  name: whisper_small_zeroshot_official_dev_keep_partial
+  name: whisper_small_zeroshot_official_dev_drop_partial
 
 data:
   dataset_name: sandi
@@ -16,11 +16,11 @@ runtime:
   device: cuda
 
 evaluation:
-  reference_col: transcript_word_keep_partial
+  reference_col: transcript_word_drop_partial
   group_cols:
     - prompt_id
     - speaker_id
 
 output:
-  prediction_path: results/sandi/predictions/whisper_small_zeroshot_official_dev_keep_partial.jsonl
-  metric_path: results/sandi/metrics/whisper_small_zeroshot_official_dev_keep_partial.json
+  prediction_path: results/sandi/predictions/whisper_small_zeroshot_official_dev_drop_partial.jsonl
+  metric_path: results/sandi/metrics/whisper_small_zeroshot_official_dev_drop_partial.json

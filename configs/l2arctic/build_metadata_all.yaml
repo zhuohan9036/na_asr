@@ -1,39 +1,9 @@
 experiment:
   name: build_metadata_all
-
 seed: 42
-
 data:
   use_l2arctic: true
-
   l2arctic_root: /home/hanzhuo/speech/l2arctic
-
-  # l2arctic_keep_speakers:
-  #   - ABA
-  #   - ASI
-  #   - BWC
-  #   - EBVS
-  #   - ERMS
-  #   - HJK
-  #   - HKK
-  #   - HQTV
-  #   - LXC
-  #   - MBMPS
-  #   - NCC 
-  #   - NJS
-  #   - PNV
-  #   - RRBI
-  #   - SKA
-  #   - SVBI
-  #   - THV
-  #   - TLV
-  #   - TNI
-  #   - TXHC
-  #   - YBAA
-  #   - YDCK
-  #   - YKWK
-  #   - ZHAA
-
-
+  dataset_name: l2arctic
 output:
   metadata_path: data/l2arctic/raw/metadata_all.jsonl

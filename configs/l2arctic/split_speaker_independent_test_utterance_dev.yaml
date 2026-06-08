@@ -1,22 +1,13 @@
 experiment:
   name: split_speaker_independent_test_utterance_dev
-
 seed: 42
-
 data:
   input_metadata: data/l2arctic/raw/metadata_all.jsonl
-
+  dataset_name: l2arctic
 split:
   strategy: speaker_independent_test_utterance_dev
-
-  # 每个 accent hold out 大约 25% speaker 做 test。
-  # 如果每个 accent 4 个 speaker，就是 1 个 test speaker。
   test_speaker_ratio: 0.25
-
-  # 剩下 speakers 的 utterances 中，10% 作为 dev。
-  # train/dev speaker 会重叠，但 test speaker 不会重叠。
   dev_utterance_ratio: 0.1
-
 output:
   manifest_dir: data/l2arctic/manifests/speaker_independent_test_utterance_dev
   summary_path: results/l2arctic/tables/speaker_independent_test_utterance_dev_split_summary.json

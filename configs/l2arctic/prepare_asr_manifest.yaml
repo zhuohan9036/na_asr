@@ -1,22 +1,17 @@
 experiment:
   name: prepare_asr_manifest
-
 data:
   input_metadata: data/l2arctic/raw/metadata_all.jsonl
-
   keep_datasets:
-    - L2-ARCTIC
-    # - CMU-ARCTIC
-
+  - L2-ARCTIC
   keep_accents:
-    - Mandarin
-    - Arabic
-    - Korean
-    - Spanish
-    - Hindi
-    - Vietnamese
-
+  - Mandarin
+  - Arabic
+  - Korean
+  - Spanish
+  - Hindi
+  - Vietnamese
   strict_wav_check: false
-
+  dataset_name: l2arctic
 output:
   manifest_dir: data/l2arctic/manifests

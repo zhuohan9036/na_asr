@@ -25,6 +25,23 @@ def write_jsonl(records: list[dict[str, Any]], output_path: str | Path) -> None:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def get_dataset_name(config: dict) -> str:
+    data_config = config.get("data", {})
+
+    if data_config.get("dataset_name"):
+        return data_config["dataset_name"]
+
+    test_manifest = str(data_config.get("test_manifest", ""))
+
+    if "data/l2arctic" in test_manifest:
+        return "l2arctic"
+
+    if "data/sandi" in test_manifest:
+        return "sandi"
+
+    return "general"
+
+
 def get_optional_fields(row: pd.Series) -> dict[str, Any]:
     """
     Keep useful dataset-specific metadata if present.
@@ -106,7 +123,12 @@ def main() -> None:
     config = load_config()
 
     experiment_name = config["experiment"]["name"]
-    logger = setup_logger(experiment_name)
+    # logger = setup_logger(experiment_name)
+    
+    # NOTE: update of logger
+    dataset_name = get_dataset_name(config)
+    logger = setup_logger(experiment_name, dataset_name=dataset_name)
+    # NOTE: end of update of logger
 
     logger.info("Starting Whisper zero-shot baseline.")
     logger.info(f"Config path: {config['_config_path']}")

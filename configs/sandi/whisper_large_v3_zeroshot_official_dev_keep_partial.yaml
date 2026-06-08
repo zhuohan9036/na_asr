@@ -1,16 +1,17 @@
 experiment:
-  name: whisper_small_zeroshot_official_dev_keep_partial
+  name: whisper_large_v3_zeroshot_official_dev_keep_partial
 
 data:
   dataset_name: sandi
   test_manifest: data/sandi/manifests/official_dev.jsonl
 
 model:
-  name: openai/whisper-small
+  name: openai/whisper-large-v3
   language: en
   task: transcribe
   sampling_rate: 16000
   max_new_tokens: 128
+  torch_dtype: float16
 
 runtime:
   device: cuda
@@ -22,5 +23,5 @@ evaluation:
     - speaker_id
 
 output:
-  prediction_path: results/sandi/predictions/whisper_small_zeroshot_official_dev_keep_partial.jsonl
-  metric_path: results/sandi/metrics/whisper_small_zeroshot_official_dev_keep_partial.json
+  prediction_path: results/sandi/predictions/whisper_large_v3_zeroshot_official_dev_keep_partial.jsonl
+  metric_path: results/sandi/metrics/whisper_large_v3_zeroshot_official_dev_keep_partial.json

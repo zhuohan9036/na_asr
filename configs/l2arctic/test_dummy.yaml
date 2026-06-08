@@ -1,11 +1,9 @@
 experiment:
   name: test_dummy
-
 seed: 42
-
 data:
   manifest_path: data/l2arctic/manifests/test_dummy.jsonl
-
+  dataset_name: l2arctic
 output:
   prediction_path: results/l2arctic/predictions/test_dummy_predictions.jsonl
   metric_path: results/l2arctic/metrics/test_dummy_metrics.json

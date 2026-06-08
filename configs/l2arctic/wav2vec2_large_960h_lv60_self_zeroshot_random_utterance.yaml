@@ -1,17 +1,19 @@
 experiment:
   name: wav2vec2_large_960h_lv60_self_zeroshot_random_utterance
-
 data:
   test_manifest: data/l2arctic/manifests/random_utterance/test.jsonl
-
+  dataset_name: l2arctic
 model:
   name: facebook/wav2vec2-large-960h-lv60-self
   sampling_rate: 16000
   torch_dtype: float32
-
 runtime:
   device: cuda
-
 output:
   prediction_path: results/l2arctic/predictions/wav2vec2_large_960h_lv60_self_zeroshot_random_utterance.jsonl
   metric_path: results/l2arctic/metrics/wav2vec2_large_960h_lv60_self_zeroshot_random_utterance.json
+evaluation:
+  reference_col: transcript
+  group_cols:
+  - accent_label
+  - speaker_id

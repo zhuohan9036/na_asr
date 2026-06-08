@@ -1,5 +1,5 @@
 experiment:
   name: check_speaker_independent_dev
-
 data:
   manifest_path: data/l2arctic/manifests/speaker_independent/dev.jsonl
+  dataset_name: l2arctic

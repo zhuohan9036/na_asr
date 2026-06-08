@@ -1,9 +1,8 @@
 experiment:
   name: whisper_large_v3_zeroshot_random_utterance
-
 data:
   test_manifest: data/l2arctic/manifests/random_utterance/test.jsonl
-
+  dataset_name: l2arctic
 model:
   name: openai/whisper-large-v3
   language: en
@@ -11,10 +10,13 @@ model:
   sampling_rate: 16000
   max_new_tokens: 128
   torch_dtype: float16
-
 runtime:
   device: cuda
-
 output:
   prediction_path: results/l2arctic/predictions/whisper_large_v3_zeroshot_random_utterance.jsonl
   metric_path: results/l2arctic/metrics/whisper_large_v3_zeroshot_random_utterance.json
+evaluation:
+  reference_col: transcript
+  group_cols:
+  - accent_label
+  - speaker_id
