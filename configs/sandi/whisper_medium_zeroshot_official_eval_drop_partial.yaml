@@ -1,0 +1,26 @@
+experiment:
+  name: whisper_medium_zeroshot_official_eval_drop_partial
+
+data:
+  dataset_name: sandi
+  test_manifest: data/sandi/manifests/official_eval.jsonl
+
+model:
+  name: openai/whisper-medium
+  language: en
+  task: transcribe
+  sampling_rate: 16000
+  max_new_tokens: 128
+
+runtime:
+  device: cuda
+
+evaluation:
+  reference_col: transcript_word_drop_partial
+  group_cols:
+    - prompt_id
+    - speaker_id
+
+output:
+  prediction_path: results/sandi/predictions/whisper_medium_zeroshot_official_eval_drop_partial.jsonl
+  metric_path: results/sandi/metrics/whisper_medium_zeroshot_official_eval_drop_partial.json

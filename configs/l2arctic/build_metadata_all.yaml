@@ -3,7 +3,7 @@ experiment:
 seed: 42
 data:
   use_l2arctic: true
-  l2arctic_root: /home/hanzhuo/speech/l2arctic
+  l2arctic_root: ../l2arctic
   dataset_name: l2arctic
 output:
   metadata_path: data/l2arctic/raw/metadata_all.jsonl

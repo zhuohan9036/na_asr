@@ -1,0 +1,23 @@
+experiment:
+  name: wav2vec2_base_zeroshot_official_dev_keep_partial
+
+data:
+  test_manifest: data/sandi/manifests/official_dev.jsonl
+
+model:
+  name: facebook/wav2vec2-base-960h
+  sampling_rate: 16000
+
+runtime:
+  device: cuda
+  batch_size: 1
+
+evaluation:
+  reference_col: transcript_word_keep_partial
+  group_cols:
+    - prompt_id
+    - speaker_id
+
+output:
+  prediction_path: results/sandi/predictions/wav2vec2_base_zeroshot_official_dev_keep_partial.jsonl
+  metric_path: results/sandi/metrics/wav2vec2_base_zeroshot_official_dev_keep_partial.json
